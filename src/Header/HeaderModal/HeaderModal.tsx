@@ -13,7 +13,7 @@ import {
 import InputMask from "react-input-mask";
 import axios from "axios";
 import { SelectChangeEvent } from "@mui/material";
-
+import qs from "qs"; 
 
 interface HeaderModalProps {
   open: boolean;
@@ -45,38 +45,40 @@ export const HeaderModal: React.FC<HeaderModalProps> = ({ open, onClose }) => {
     }));
   };
 
-  const handleSubmit = async () => {
-    const formattedPhone = formData.phone.replace(/\D/g, "");
-    const data = {
-      page: "/",
-      service: formData.service,
-      name: formData.name,
-      phone: formattedPhone,
-      university: formData.university,
-    };
 
-    setLoading(true);
-    try {
-      const response = await axios.post(
-        "https://bigozo.ru/api/submit-main-application/",
-        JSON.stringify(data),
-        {
-          headers: {
-            "Content-Type": "application/json",
-            "Accept": "application/json",
-          },
-        }
-      );
-  
-      console.log("Успешно отправлено", response.data);
-      setFormData({ service: "", name: "", phone: "", university: "" });
-      onClose();
-    } catch (error) {
-      console.error("Ошибка:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
+const handleSubmit = async () => {
+  const formattedPhone = formData.phone.replace(/\D/g, "");
+
+  const data = qs.stringify({
+    page: "/",
+    service: formData.service,
+    name: formData.name,
+    phone: formattedPhone,
+    university: formData.university,
+  });
+
+  setLoading(true);
+  try {
+    const response = await axios.post(
+      "https://bigozo.ru/api/submit-main-application/",
+      data, // Передаём строку
+      {
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+          "Accept": "application/json",
+        },
+      }
+    );
+
+    console.log("Успешно отправлено", response.data);
+    setFormData({ service: "", name: "", phone: "", university: "" });
+    onClose();
+  } catch (error) {
+    console.error("Ошибка:", error);
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <Modal open={open} onClose={onClose}>
